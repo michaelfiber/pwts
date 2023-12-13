@@ -134,7 +134,7 @@ void draw_missiles(Camera2D camera)
     {
         if (explosions[i].alpha > 0.0f)
         {
-            Color c = Fade(WHITE, explosions->alpha);
+            Color c = Fade(WHITE, explosions[i].alpha);
             DrawCircle(explosions[i].pos.x, explosions[i].pos.y, explosions[i].radius, c);
         }
     }
