@@ -49,8 +49,8 @@ void update_bullets(Vector2 targeter, Ship player)
                     player.vel.x + player.bullet_speed * cosf(gun_normal),
                     player.vel.y + player.bullet_speed * sinf(gun_normal)},
                 (Vector2){
-                    player.loc.x + 25 * cosf((player.rot + 90) * DEG2RAD),
-                    player.loc.y + 25 * sinf((player.rot + 90) * DEG2RAD)},
+                    player.loc.x + 2 * cosf((player.rot + 90) * DEG2RAD),
+                    player.loc.y + 2 * sinf((player.rot + 90) * DEG2RAD)},
                 1.0f,
                 3.0f);
         }
@@ -62,8 +62,8 @@ void update_bullets(Vector2 targeter, Ship player)
                     player.vel.x + player.bullet_speed * cosf(gun_normal),
                     player.vel.y + player.bullet_speed * sinf(gun_normal)},
                 (Vector2){
-                    player.loc.x + 25 * cosf((player.rot - 90) * DEG2RAD),
-                    player.loc.y + 25 * sinf((player.rot - 90) * DEG2RAD)},
+                    player.loc.x + 4 * cosf((player.rot - 90) * DEG2RAD),
+                    player.loc.y + 4 * sinf((player.rot - 90) * DEG2RAD)},
                 1.0f,
                 3.0f);
         }
@@ -87,6 +87,9 @@ void draw_bullets(Camera2D camera)
 {
     for (int i = 0; i < BULLET_MAX; i++)
     {
-        DrawRectangle(bullets[i].pos.x - (2 / camera.zoom), bullets[i].pos.y - (2 / camera.zoom), 4 / camera.zoom, 4 / camera.zoom, WHITE);
+        if (bullets[i].life > 0.0f)
+        {
+            DrawRectangle(bullets[i].pos.x - (2 / camera.zoom), bullets[i].pos.y - (2 / camera.zoom), 4 / camera.zoom, 4 / camera.zoom, WHITE);
+        }
     }
 }

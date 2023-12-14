@@ -27,6 +27,9 @@ Shader shader;
 
 RenderTexture2D render_texture;
 
+Vector3 stars[1000];
+Color star_color;
+
 int main(void)
 {
     InitWindow(ScreenWidth, ScreenHeight, "Hello World!");
@@ -41,11 +44,20 @@ int main(void)
     player.tex = LoadTexture("resources/ship.png");
     player.thruster_power = 150.0f;
     player.engine_power = 150.0f;
-    player.bullet_speed = 1500.0f;
+    player.bullet_speed = 800.0f;
 
     camera.offset.x = ScreenWidth / 2;
     camera.offset.y = ScreenHeight / 2;
     camera.zoom = 1.0f;
+
+    star_color = (Color){150, 200, 255, 200};
+
+    for (int i = 0; i < 1000; i++)
+    {
+        stars[i].x = GetRandomValue(-1000, 1000);
+        stars[i].y = GetRandomValue(-1000, 1000);
+        stars[i].z = GetRandomValue(1, 20) / 10.0f;
+    }
 
     emscripten_set_main_loop(update, 0, 1);
 
@@ -93,8 +105,8 @@ void update()
 
     Vector2 mouse_pos = GetMousePosition();
     Vector2 targeter = (Vector2){
-        (mouse_pos.x - camera.offset.x) / camera.zoom,
-        (mouse_pos.y - camera.offset.y) / camera.zoom};
+        ((mouse_pos.x - camera.offset.x) / camera.zoom) + player.loc.x,
+        ((mouse_pos.y - camera.offset.y) / camera.zoom) + player.loc.y};
 
     player.loc.x += player.vel.x * GetFrameTime();
     player.loc.y += player.vel.y * GetFrameTime();
@@ -109,16 +121,19 @@ void update()
         player.rot += 360;
     }
 
-    float mouseWheel = GetMouseWheelMove();
-    if (fabsf(mouseWheel) > 0.1f)
-    {
-        camera.zoom += mouseWheel * GetFrameTime();
-    }
+    // float mouseWheel = GetMouseWheelMove();
+    // if (fabsf(mouseWheel) > 0.1f)
+    // {
+    //     camera.zoom += mouseWheel * GetFrameTime();
+    // }
 
-    if (camera.zoom < 0.1f)
-    {
-        camera.zoom = 0.1f;
-    }
+    // if (camera.zoom < 0.1f)
+    // {
+    //     camera.zoom = 0.1f;
+    // }
+
+    camera.target.x = player.loc.x;
+    camera.target.y = player.loc.y;
 
     update_missiles(targeter, player);
     update_bullets(targeter, player);
@@ -129,6 +144,11 @@ void update()
 
         BeginMode2D(camera);
         {
+            for (int i = 0; i < 1000; i++)
+            {
+                DrawCircle(stars[i].x, stars[i].y, stars[i].z, star_color);
+            }
+
             if (beam.alpha > 0.0f)
             {
                 DrawLineEx(beam.start, beam.end, (2 - beam.alpha) * 2, Fade(WHITE, beam.alpha));
@@ -159,7 +179,7 @@ void update()
 
         DrawText(TextFormat("%f\n%f", player.rot, camera.zoom), 20, 40, GetFontDefault().baseSize * 2, RED);
 
-        DrawFPS(20, 20);        
+        DrawFPS(20, 20);
     }
     EndDrawing();
 }
