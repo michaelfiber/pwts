@@ -3,6 +3,7 @@
 #include "emscripten/emscripten.h"
 #include "missiles.h"
 #include "bullets.h"
+#include "particles.h"
 
 void update();
 
@@ -26,9 +27,9 @@ Beam beam;
 Shader shader;
 
 RenderTexture2D render_texture;
+RenderTexture2D starfield_texture;
 
-Vector3 stars[1000];
-Color star_color;
+#define STARS_MAX 8000
 
 int main(void)
 {
@@ -46,19 +47,51 @@ int main(void)
     player.engine_power = 150.0f;
     player.bullet_speed = 800.0f;
 
+    player.em_engine.width = 5.0f;
+    player.em_engine.color = (Color){ 150, 200, 255, 255 };
+    player.em_engine.rate = 30.0f;
+    player.em_engine.life = 2.5f;
+    player.em_engine.thrust = 100.0f;
+    player.em_engine.size = 5.0f;
+    
+    player.em_bow_p.width = 2.0f;
+    player.em_bow_p.color = (Color){ 200, 100, 100, 255 };
+    player.em_bow_p.rate = 15.0f;
+    player.em_bow_p.life = 1.5f;
+    player.em_bow_p.thrust = 50.0f;
+    player.em_bow_p.size = 2.0f;
+
+    player.em_bow_s.width = 2.0f;
+    player.em_bow_s.color = (Color){ 200, 100, 100, 255 };
+    player.em_bow_s.rate = 15.0f;
+    player.em_bow_s.life = 1.5f;
+    player.em_bow_s.thrust = 50.0f;
+    player.em_bow_s.size = 2.0f;
+
     camera.offset.x = ScreenWidth / 2;
     camera.offset.y = ScreenHeight / 2;
     camera.zoom = 1.0f;
 
-    star_color = (Color){150, 200, 255, 200};
+    // generate the starfield
+    starfield_texture = LoadRenderTexture(10000, 10000);
 
-    for (int i = 0; i < 1000; i++)
+    BeginTextureMode(starfield_texture);
     {
-        stars[i].x = GetRandomValue(-1000, 1000);
-        stars[i].y = GetRandomValue(-1000, 1000);
-        stars[i].z = GetRandomValue(1, 20) / 10.0f;
-    }
+        ClearBackground(BLACK);
 
+        Color star_color = (Color){150, 200, 255, 200};
+
+        for (int i = 0; i < STARS_MAX; i++)
+        {
+            float x = GetRandomValue(0, 10000);
+            float y = GetRandomValue(0, 10000);
+            float z = GetRandomValue(1, 20) / 10.0f;
+            DrawCircle(x, y, z, star_color);
+        }
+    }
+    EndTextureMode();
+
+    // start the main loop wiuth emscripten.
     emscripten_set_main_loop(update, 0, 1);
 
     CloseWindow();
@@ -81,6 +114,10 @@ void update()
         player.vel.x += cosf(player.rot * DEG2RAD) * player.engine_power * GetFrameTime();
         player.vel.y += sinf(player.rot * DEG2RAD) * player.engine_power * GetFrameTime();
     }
+
+    player.em_engine.on = IsKeyDown(KEY_W);
+    player.em_bow_p.on = IsKeyDown(KEY_D);
+    player.em_bow_s.on = IsKeyDown(KEY_A);
 
     if (railgun_cooldown > 0.0f)
     {
@@ -137,6 +174,7 @@ void update()
 
     update_missiles(targeter, player);
     update_bullets(targeter, player);
+    update_ship(&player);
 
     BeginTextureMode(render_texture);
     {
@@ -144,10 +182,8 @@ void update()
 
         BeginMode2D(camera);
         {
-            for (int i = 0; i < 1000; i++)
-            {
-                DrawCircle(stars[i].x, stars[i].y, stars[i].z, star_color);
-            }
+            DrawTexturePro(starfield_texture.texture, (Rectangle){ 0, 0, 10000, -10000}, (Rectangle){ 0, 0, 10000, 10000}, (Vector2){ 5000, 5000 }, 0.0f, WHITE);
+            DrawRectangleLines(-5000, -5000, 10000, 10000, GREEN);
 
             if (beam.alpha > 0.0f)
             {
@@ -156,6 +192,10 @@ void update()
 
             draw_missiles(camera);
             draw_bullets(camera);
+            
+            draw_emitter(&player.em_engine);
+            draw_emitter(&player.em_bow_p);
+            draw_emitter(&player.em_bow_s);
 
             DrawCircleLines(targeter.x, targeter.y, 5 / camera.zoom, GREEN);
         }
