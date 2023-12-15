@@ -89,10 +89,10 @@ void update_missiles(Vector2 targeter, Ship player)
         {
         case MISSILE_GO:
             // check for collision
-            if (CheckCollisionCircles(targets[i].pos, 100, targets[i].missile.pos, 10))
+            if (CheckCollisionCircles(targets[i].pos, 10, targets[i].missile.pos, 10))
             {
                 targets[i].is_active = false;
-                add_explosion(targets[i].pos, 100.0f);
+                add_explosion(targets[i].pos, 50.0f);
             }
             break;
         case MISSILE_FLOAT:
@@ -101,8 +101,8 @@ void update_missiles(Vector2 targeter, Ship player)
             {
                 targets[i].missile.state = MISSILE_GO;
                 targets[i].missile.rot = atan2f(targets[i].missile.pos.y - targets[i].pos.y, targets[i].missile.pos.x - targets[i].pos.x) * RAD2DEG;
-                targets[i].missile.vel.x = cosf(targets[i].missile.rot * DEG2RAD) * 1000;
-                targets[i].missile.vel.y = sinf(targets[i].missile.rot * DEG2RAD) * 1000;
+                targets[i].missile.vel.x = cosf(targets[i].missile.rot * DEG2RAD) * 400;
+                targets[i].missile.vel.y = sinf(targets[i].missile.rot * DEG2RAD) * 400;
             }
             break;
         }

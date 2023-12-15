@@ -89,7 +89,7 @@ void draw_bullets(Camera2D camera)
     {
         if (bullets[i].life > 0.0f)
         {
-            DrawRectangle(bullets[i].pos.x - (2 / camera.zoom), bullets[i].pos.y - (2 / camera.zoom), 4 / camera.zoom, 4 / camera.zoom, WHITE);
+            DrawCircleV(bullets[i].pos, 2, WHITE);
         }
     }
 }

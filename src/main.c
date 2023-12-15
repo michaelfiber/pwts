@@ -24,7 +24,8 @@ typedef struct
 
 Beam beam;
 
-Shader shader;
+Shader glow_shader;
+Shader stars_shader;
 
 RenderTexture2D render_texture;
 RenderTexture2D starfield_texture;
@@ -36,33 +37,33 @@ int main(void)
     InitWindow(ScreenWidth, ScreenHeight, "Hello World!");
     render_texture = LoadRenderTexture(ScreenWidth, ScreenHeight);
 
-    shader = LoadShader(0, "resources/shader.fs");
-
+    glow_shader = LoadShader(0, "resources/shader.fs");
+    stars_shader = LoadShader(0, "resources/shader2.fs");
     init_missiles();
 
     HideCursor();
 
     player.tex = LoadTexture("resources/ship.png");
     player.thruster_power = 150.0f;
-    player.engine_power = 150.0f;
+    player.engine_power = 50.0f;
     player.bullet_speed = 800.0f;
 
     player.em_engine.width = 5.0f;
-    player.em_engine.color = (Color){ 150, 200, 255, 255 };
+    player.em_engine.color = (Color){150, 200, 255, 255};
     player.em_engine.rate = 30.0f;
     player.em_engine.life = 2.5f;
     player.em_engine.thrust = 100.0f;
     player.em_engine.size = 5.0f;
-    
+
     player.em_bow_p.width = 2.0f;
-    player.em_bow_p.color = (Color){ 200, 100, 100, 255 };
+    player.em_bow_p.color = (Color){200, 100, 100, 255};
     player.em_bow_p.rate = 15.0f;
     player.em_bow_p.life = 1.5f;
     player.em_bow_p.thrust = 50.0f;
     player.em_bow_p.size = 2.0f;
 
     player.em_bow_s.width = 2.0f;
-    player.em_bow_s.color = (Color){ 200, 100, 100, 255 };
+    player.em_bow_s.color = (Color){200, 100, 100, 255};
     player.em_bow_s.rate = 15.0f;
     player.em_bow_s.life = 1.5f;
     player.em_bow_s.thrust = 50.0f;
@@ -182,7 +183,9 @@ void update()
 
         BeginMode2D(camera);
         {
-            DrawTexturePro(starfield_texture.texture, (Rectangle){ 0, 0, 10000, -10000}, (Rectangle){ 0, 0, 10000, 10000}, (Vector2){ 5000, 5000 }, 0.0f, WHITE);
+            DrawTexturePro(starfield_texture.texture, (Rectangle){0, 0, 10000, -10000}, (Rectangle){0, 0, 10000, 10000}, (Vector2){5000, 5000}, 0.0f, WHITE);
+            EndShaderMode();
+
             DrawRectangleLines(-5000, -5000, 10000, 10000, GREEN);
 
             if (beam.alpha > 0.0f)
@@ -192,7 +195,7 @@ void update()
 
             draw_missiles(camera);
             draw_bullets(camera);
-            
+
             draw_emitter(&player.em_engine);
             draw_emitter(&player.em_bow_p);
             draw_emitter(&player.em_bow_s);
@@ -205,7 +208,7 @@ void update()
 
     BeginDrawing();
     {
-        BeginShaderMode(shader);
+        BeginShaderMode(glow_shader);
         {
             DrawTextureRec(render_texture.texture, (Rectangle){0, 0, ScreenWidth, -ScreenHeight}, (Vector2){0, 0}, WHITE);
         }
