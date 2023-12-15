@@ -4,6 +4,7 @@
 #include "missiles.h"
 #include "bullets.h"
 #include "particles.h"
+#include "asteroid.h"
 
 void update();
 
@@ -25,7 +26,6 @@ typedef struct
 Beam beam;
 
 Shader glow_shader;
-Shader stars_shader;
 
 RenderTexture2D render_texture;
 RenderTexture2D starfield_texture;
@@ -38,8 +38,8 @@ int main(void)
     render_texture = LoadRenderTexture(ScreenWidth, ScreenHeight);
 
     glow_shader = LoadShader(0, "resources/shader.fs");
-    stars_shader = LoadShader(0, "resources/shader2.fs");
     init_missiles();
+    init_asteroid();
 
     HideCursor();
 
@@ -176,6 +176,7 @@ void update()
     update_missiles(targeter, player);
     update_bullets(targeter, player);
     update_ship(&player);
+    update_asteroids();
 
     BeginTextureMode(render_texture);
     {
@@ -216,6 +217,7 @@ void update()
 
         BeginMode2D(camera);
         {
+            draw_asteroid();
             DrawTexturePro(player.tex, (Rectangle){0, 0, player.tex.width, player.tex.height}, (Rectangle){player.loc.x, player.loc.y, player.tex.width, player.tex.height}, (Vector2){player.tex.width / 2, player.tex.height / 2}, player.rot, WHITE);
         }
         EndMode2D();
