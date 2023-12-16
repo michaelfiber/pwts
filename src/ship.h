@@ -3,6 +3,15 @@
 #include <raylib.h>
 #include "particles.h"
 
+#define EMITTERS_MAX 3
+
+typedef struct
+{
+    Emitter em;
+    float distance;
+    float offset;
+} EmitterPlacement;
+
 typedef struct
 {
     Texture2D tex;
@@ -15,9 +24,7 @@ typedef struct
     float engine_power;
     float bullet_speed;
 
-    Emitter em_engine;
-    Emitter em_bow_p;
-    Emitter em_bow_s;
+    EmitterPlacement emitters[EMITTERS_MAX];
 } Ship;
 
 void update_ship(Ship *s);

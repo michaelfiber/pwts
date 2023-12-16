@@ -4,7 +4,8 @@
 
 void update_ship(Ship *s)
 {
-    update_emitter((Vector2){s->loc.x - 10 * cosf(s->rot * DEG2RAD), s->loc.y - 10 * sinf(s->rot * DEG2RAD)}, s->rot + 180, s->vel, &s->em_engine);
-    update_emitter((Vector2){s->loc.x + 15 * cosf(s->rot * DEG2RAD), s->loc.y + 15 * sinf(s->rot * DEG2RAD)}, s->rot - 90, s->vel, &s->em_bow_p);
-    update_emitter((Vector2){s->loc.x + 15 * cosf(s->rot * DEG2RAD), s->loc.y + 15 * sinf(s->rot * DEG2RAD)}, s->rot + 90, s->vel, &s->em_bow_s);
+    for (int i = 0; i < EMITTERS_MAX; i++)
+    {
+        update_emitter((Vector2){s->loc.x + s->emitters[i].distance * cosf(s->rot * DEG2RAD), s->loc.y + s->emitters[i].distance * sinf(s->rot * DEG2RAD)}, s->rot + s->emitters[i].offset, s->vel, &s->emitters[i].em);
+    }
 }

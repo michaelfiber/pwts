@@ -48,26 +48,32 @@ int main(void)
     player.engine_power = 50.0f;
     player.bullet_speed = 800.0f;
 
-    player.em_engine.width = 5.0f;
-    player.em_engine.color = (Color){150, 200, 255, 255};
-    player.em_engine.rate = 30.0f;
-    player.em_engine.life = 2.5f;
-    player.em_engine.thrust = 100.0f;
-    player.em_engine.size = 5.0f;
+    player.emitters[0].em.width = 5.0f;
+    player.emitters[0].em.color = (Color){150, 200, 255, 255};
+    player.emitters[0].em.rate = 30.0f;
+    player.emitters[0].em.life = 2.5f;
+    player.emitters[0].em.thrust = 100.0f;
+    player.emitters[0].em.size = 5.0f;
+    player.emitters[0].distance = -10;
+    player.emitters[0].offset = 180;
 
-    player.em_bow_p.width = 2.0f;
-    player.em_bow_p.color = (Color){200, 100, 100, 255};
-    player.em_bow_p.rate = 15.0f;
-    player.em_bow_p.life = 1.5f;
-    player.em_bow_p.thrust = 50.0f;
-    player.em_bow_p.size = 2.0f;
+    player.emitters[1].em.width = 2.0f;
+    player.emitters[1].em.color = (Color){255, 200, 200, 255};
+    player.emitters[1].em.rate = 15.0f;
+    player.emitters[1].em.life = 1.5f;
+    player.emitters[1].em.thrust = 50.0f;
+    player.emitters[1].em.size = 2.0f;
+    player.emitters[1].distance = 15;
+    player.emitters[1].offset = -90;
 
-    player.em_bow_s.width = 2.0f;
-    player.em_bow_s.color = (Color){200, 100, 100, 255};
-    player.em_bow_s.rate = 15.0f;
-    player.em_bow_s.life = 1.5f;
-    player.em_bow_s.thrust = 50.0f;
-    player.em_bow_s.size = 2.0f;
+    player.emitters[2].em.width = 2.0f;
+    player.emitters[2].em.color = (Color){255, 200, 200, 255};
+    player.emitters[2].em.rate = 15.0f;
+    player.emitters[2].em.life = 1.5f;
+    player.emitters[2].em.thrust = 50.0f;
+    player.emitters[2].em.size = 2.0f;
+    player.emitters[2].distance = 15;
+    player.emitters[2].offset = 90;
 
     camera.offset.x = ScreenWidth / 2;
     camera.offset.y = ScreenHeight / 2;
@@ -116,9 +122,9 @@ void update()
         player.vel.y += sinf(player.rot * DEG2RAD) * player.engine_power * GetFrameTime();
     }
 
-    player.em_engine.on = IsKeyDown(KEY_W);
-    player.em_bow_p.on = IsKeyDown(KEY_D);
-    player.em_bow_s.on = IsKeyDown(KEY_A);
+    player.emitters[0].em.on = IsKeyDown(KEY_W);
+    player.emitters[1].em.on = IsKeyDown(KEY_D);
+    player.emitters[2].em.on = IsKeyDown(KEY_A);
 
     if (railgun_cooldown > 0.0f)
     {
@@ -196,10 +202,14 @@ void update()
 
             draw_missiles(camera);
             draw_bullets(camera);
+            draw_asteroid();
 
-            draw_emitter(&player.em_engine);
-            draw_emitter(&player.em_bow_p);
-            draw_emitter(&player.em_bow_s);
+            for (int i = 0; i < EMITTERS_MAX; i++)
+            {
+                draw_emitter(&player.emitters[i].em);
+            }
+
+            DrawTexturePro(player.tex, (Rectangle){0, 0, player.tex.width, player.tex.height}, (Rectangle){player.loc.x, player.loc.y, player.tex.width, player.tex.height}, (Vector2){player.tex.width / 2, player.tex.height / 2}, player.rot, WHITE);
 
             DrawCircleLines(targeter.x, targeter.y, 5 / camera.zoom, GREEN);
         }
@@ -215,15 +225,7 @@ void update()
         }
         EndShaderMode();
 
-        BeginMode2D(camera);
-        {
-            draw_asteroid();
-            DrawTexturePro(player.tex, (Rectangle){0, 0, player.tex.width, player.tex.height}, (Rectangle){player.loc.x, player.loc.y, player.tex.width, player.tex.height}, (Vector2){player.tex.width / 2, player.tex.height / 2}, player.rot, WHITE);
-        }
-        EndMode2D();
-
         DrawText(TextFormat("%f\n%f", player.rot, camera.zoom), 20, 40, GetFontDefault().baseSize * 2, RED);
-
         DrawFPS(20, 20);
     }
     EndDrawing();
