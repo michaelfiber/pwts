@@ -48,7 +48,7 @@ void update_asteroids()
 {
     for (int i = 0; i < ASTEROID_MAX; i++)
     {
-        asteroids[i].rot += asteroids[i].delta_rot * GetFrameTime();
+        //asteroids[i].rot += asteroids[i].delta_rot * GetFrameTime();
 
         asteroids[i].cool_down -= GetFrameTime();
         if (asteroids[i].cool_down < 0.0f)
@@ -67,6 +67,6 @@ void draw_asteroid()
 {
     for (int i = 0; i < ASTEROID_MAX; i++)
     {
-        DrawTexturePro(tex, frames[asteroids[i].frame], asteroids[i].dest, (Vector2){asteroids[i].dest.width / 2.0f, asteroids[i].dest.height / 2.0f}, asteroids[i].rot, WHITE);
+        DrawTexturePro(tex, frames[asteroids[i].frame], asteroids[i].dest, (Vector2){asteroids[i].dest.width / 2.0f, asteroids[i].dest.height / 2.0f}, 0.0f, WHITE);
     }
 }
