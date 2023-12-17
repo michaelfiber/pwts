@@ -10,7 +10,7 @@ CC=../emsdk/emsdk-main/upstream/emscripten/emcc
 # This is the directory within `src` where the finished files will be placed.
 DEST=./build
 
-CFLAGS=-I. -I./external -s USE_GLFW=3 --preload-file resources --shell-file ./minshell.html
+CFLAGS=-I. -I./external -s USE_GLFW=3 --preload-file resources --shell-file ./minshell.html -s INITIAL_MEMORY=67108864
 MAKE=make
 
 OBJ=$(patsubst %.c, %.o, $(PROJECT_SOURCE_FILES)) ./external/libraylib.a

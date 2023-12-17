@@ -3,17 +3,21 @@
 
 #define FRAME_COUNT 48
 
-Texture2D tex;
+Texture2D tex[3];
 
 Rectangle frames[FRAME_COUNT];
-int frame_width = 37;
-int frame_height = 37;
+int frame_width = 128;
+int frame_height = 128;
 
 Asteroid asteroids[ASTEROID_MAX];
 
 void init_asteroid()
 {
-    tex = LoadTexture("resources/asteroid1.png");
+    // Add to credits: https://opengameart.org/content/asteroid-sprite-sheets
+    tex[0] = LoadTexture("resources/asteroid1.png");
+    tex[1] = LoadTexture("resources/asteroid2.png");
+    tex[2] = LoadTexture("resources/asteroid3.png");
+
     int i = 0;
     for (int y = 0; y < 7; y++)
     {
@@ -34,8 +38,9 @@ void init_asteroid()
 
     for (int a = 0; a < ASTEROID_MAX; a++)
     {
+        asteroids[a].type = GetRandomValue(0, 2);
         asteroids[a].frame = GetRandomValue(0, FRAME_COUNT - 1);
-        asteroids[a].rate = GetRandomValue(5, 10) / 10.0f;
+        asteroids[a].rate = GetRandomValue(1, 5) / 10.0f;
         asteroids[a].dest.x = GetRandomValue(-5000, 5000);
         asteroids[a].dest.y = GetRandomValue(-5000, 5000);
         asteroids[a].dest.width = GetRandomValue(32, 128);
@@ -67,6 +72,6 @@ void draw_asteroid()
 {
     for (int i = 0; i < ASTEROID_MAX; i++)
     {
-        DrawTexturePro(tex, frames[asteroids[i].frame], asteroids[i].dest, (Vector2){asteroids[i].dest.width / 2.0f, asteroids[i].dest.height / 2.0f}, 0.0f, WHITE);
+        DrawTexturePro(tex[asteroids[i].type], frames[asteroids[i].frame], asteroids[i].dest, (Vector2){asteroids[i].dest.width / 2.0f, asteroids[i].dest.height / 2.0f}, 0.0f, WHITE);
     }
 }

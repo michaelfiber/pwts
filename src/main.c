@@ -80,7 +80,7 @@ int main(void)
     camera.zoom = 1.0f;
 
     // generate the starfield
-    starfield_texture = LoadRenderTexture(10000, 10000);
+    starfield_texture = LoadRenderTexture(12000, 12000);
 
     BeginTextureMode(starfield_texture);
     {
@@ -90,8 +90,8 @@ int main(void)
 
         for (int i = 0; i < STARS_MAX; i++)
         {
-            float x = GetRandomValue(0, 10000);
-            float y = GetRandomValue(0, 10000);
+            float x = GetRandomValue(0, 12000);
+            float y = GetRandomValue(0, 12000);
             float z = GetRandomValue(1, 20) / 10.0f;
             DrawCircle(x, y, z, star_color);
         }
@@ -188,11 +188,17 @@ void update()
     {
         ClearBackground(BLACK);
 
+        float zoom = camera.zoom;
+        camera.zoom = zoom * 0.6f;
         BeginMode2D(camera);
         {
             DrawTexturePro(starfield_texture.texture, (Rectangle){0, 0, 10000, -10000}, (Rectangle){0, 0, 10000, 10000}, (Vector2){5000, 5000}, 0.0f, WHITE);
-            EndShaderMode();
+        }
+        EndMode2D();
 
+        camera.zoom = zoom;
+        BeginMode2D(camera);
+        {
             DrawRectangleLines(-5000, -5000, 10000, 10000, GREEN);
 
             if (beam.alpha > 0.0f)
