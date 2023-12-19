@@ -1,5 +1,6 @@
 #include <raylib.h>
 #include "asteroid.h"
+#include "collider.h"
 
 #define FRAME_COUNT 48
 
@@ -41,11 +42,13 @@ void init_asteroid()
         asteroids[a].type = GetRandomValue(0, 2);
         asteroids[a].frame = GetRandomValue(0, FRAME_COUNT - 1);
         asteroids[a].rate = GetRandomValue(1, 5) / 10.0f;
-        asteroids[a].dest.x = GetRandomValue(-5000, 5000);
-        asteroids[a].dest.y = GetRandomValue(-5000, 5000);
-        asteroids[a].dest.width = GetRandomValue(32, 128);
-        asteroids[a].dest.height = asteroids[a].dest.width;
+        asteroids[a].loc.dest.x = GetRandomValue(-5000, 5000);
+        asteroids[a].loc.dest.y = GetRandomValue(-5000, 5000);
+        asteroids[a].loc.dest.width = GetRandomValue(0, 96) + 32;
+        asteroids[a].loc.dest.height = asteroids[a].loc.dest.width;
         asteroids[a].delta_rot = GetRandomValue(-500, 500);
+        asteroids[a].life = (asteroids[a].loc.dest.width - 32) * 10;
+        add_collider(&asteroids[a].loc, LOC_TYPE_ASTEROID);
     }
 }
 
@@ -53,10 +56,11 @@ void update_asteroids()
 {
     for (int i = 0; i < ASTEROID_MAX; i++)
     {
-        //asteroids[i].rot += asteroids[i].delta_rot * GetFrameTime();
+        if (asteroids[i].life <= 0) continue;
 
         asteroids[i].cool_down -= GetFrameTime();
-        if (asteroids[i].cool_down < 0.0f)
+
+        if (asteroids[i].cool_down <= 0.0f)
         {
             asteroids[i].frame++;
             if (asteroids[i].frame >= FRAME_COUNT)
@@ -65,6 +69,21 @@ void update_asteroids()
             }
             asteroids[i].cool_down = asteroids[i].rate;
         }
+
+        switch (asteroids[i].loc.is_hitting_type)
+        {
+        case LOC_TYPE_BULLET:
+            asteroids[i].life -= 1;
+            break;
+        case LOC_TYPE_MISSILE:
+            asteroids[i].life -= 50;
+            break;
+        }
+
+        if (asteroids[i].life <= 0)
+        {
+            remove_collider(&asteroids[i].loc);
+        }
     }
 }
 
@@ -72,6 +91,10 @@ void draw_asteroid()
 {
     for (int i = 0; i < ASTEROID_MAX; i++)
     {
-        DrawTexturePro(tex[asteroids[i].type], frames[asteroids[i].frame], asteroids[i].dest, (Vector2){asteroids[i].dest.width / 2.0f, asteroids[i].dest.height / 2.0f}, 0.0f, WHITE);
+        if (asteroids[i].life <= 0)
+        {
+            continue;
+        }
+        DrawTexturePro(tex[asteroids[i].type], frames[asteroids[i].frame], asteroids[i].loc.dest, (Vector2){0, 0}, 0.0f, WHITE);
     }
 }

@@ -73,6 +73,7 @@ void update_missiles(Vector2 targeter, Ship player)
                 targets[i].missile.state = MISSILE_FLOAT;
                 targets[i].missile.fuse = 0.5f;
                 targets[i].missile.rot = player.rot;
+                add_collider(&targets[i].missile.loc, LOC_TYPE_MISSILE);
                 break;
             }
         }
@@ -89,10 +90,11 @@ void update_missiles(Vector2 targeter, Ship player)
         {
         case MISSILE_GO:
             // check for collision
-            if (CheckCollisionCircles(targets[i].pos, 10, targets[i].missile.pos, 10))
+            if (CheckCollisionCircles(targets[i].pos, 10, targets[i].missile.pos, 10) || targets[i].missile.loc.is_hitting_type == LOC_TYPE_ASTEROID || targets[i].missile.loc.is_hitting_type == LOC_TYPE_BULLET)
             {
                 targets[i].is_active = false;
-                add_explosion(targets[i].pos, 50.0f);
+                add_explosion(targets[i].missile.pos, 50.0f);
+                remove_collider(&targets[i].missile.loc);
             }
             break;
         case MISSILE_FLOAT:
@@ -109,6 +111,10 @@ void update_missiles(Vector2 targeter, Ship player)
 
         targets[i].missile.pos.x -= targets[i].missile.vel.x * GetFrameTime();
         targets[i].missile.pos.y -= targets[i].missile.vel.y * GetFrameTime();
+        targets[i].missile.loc.dest.x = targets[i].missile.pos.x - 5;
+        targets[i].missile.loc.dest.y = targets[i].missile.pos.y - 5;
+        targets[i].missile.loc.dest.width = 10;
+        targets[i].missile.loc.dest.height = 10;
     }
 
     update_explosions();

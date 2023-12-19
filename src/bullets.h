@@ -2,10 +2,11 @@
 
 #include <raylib.h>
 #include "ship.h"
+#include "collider.h"
 
 typedef struct
 {
-    Vector2 pos;
+    Location loc;
     Vector2 vel;
     float life;
     float power;

@@ -5,6 +5,7 @@
 #include "bullets.h"
 #include "particles.h"
 #include "asteroid.h"
+#include "collider.h"
 
 void update();
 
@@ -179,6 +180,8 @@ void update()
     camera.target.x = player.loc.x;
     camera.target.y = player.loc.y;
 
+    check_colliders();
+
     update_missiles(targeter, player);
     update_bullets(targeter, player);
     update_ship(&player);
@@ -216,8 +219,9 @@ void update()
             }
 
             DrawTexturePro(player.tex, (Rectangle){0, 0, player.tex.width, player.tex.height}, (Rectangle){player.loc.x, player.loc.y, player.tex.width, player.tex.height}, (Vector2){player.tex.width / 2, player.tex.height / 2}, player.rot, WHITE);
-
+            //DrawCircleLines((int)player.loc.x, (int)player.loc.y, 20, WHITE);
             DrawCircleLines(targeter.x, targeter.y, 5 / camera.zoom, GREEN);
+            //draw_colliders();
         }
         EndMode2D();
     }
@@ -231,7 +235,7 @@ void update()
         }
         EndShaderMode();
 
-        DrawText(TextFormat("%f\n%f", player.rot, camera.zoom), 20, 40, GetFontDefault().baseSize * 2, RED);
+        DrawText(TextFormat("%f\n%f\n%d %d\n", player.rot, camera.zoom, (int)player.loc.x, (int)player.loc.y), 20, 40, GetFontDefault().baseSize * 2, RED);
         DrawFPS(20, 20);
     }
     EndDrawing();

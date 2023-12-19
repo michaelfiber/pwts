@@ -2,6 +2,7 @@
 
 #include <raylib.h>
 #include "ship.h"
+#include "collider.h"
 
 #define MISSILE_FLOAT 0
 #define MISSILE_GO 1
@@ -12,6 +13,7 @@ typedef struct
 {
     bool is_active;
     Vector2 pos;
+    Location loc;
     Vector2 vel;
     float fuse;
     int state;
