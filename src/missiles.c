@@ -2,53 +2,11 @@
 #include <raylib.h>
 #include "missiles.h"
 #include "ship.h"
-
-#define EXPLOSION_MAX 100
-
-typedef struct
-{
-    Vector2 pos;
-    float radius;
-    float alpha;
-} Explosion;
+#include "explosion.h"
 
 Target targets[TARGET_MAX];
 Vector2 targeter;
-Explosion explosions[EXPLOSION_MAX];
 Texture2D missile_tex;
-
-void add_explosion(Vector2 pos, float radius)
-{
-    for (int i = 0; i < EXPLOSION_MAX; i++)
-    {
-        if (explosions[i].alpha > 0.0f)
-        {
-            continue;
-        }
-
-        explosions[i].alpha = 1.0f;
-        explosions[i].pos.x = pos.x;
-        explosions[i].pos.y = pos.y;
-        explosions[i].radius = radius;
-        break;
-    }
-}
-
-void update_explosions()
-{
-    for (int i = 0; i < EXPLOSION_MAX; i++)
-    {
-        if (explosions[i].alpha > 0.0f)
-        {
-            explosions[i].alpha -= GetFrameTime();
-
-            if (explosions[i].alpha < 0.0f)
-            {
-                explosions[i].alpha = 0.0f;
-            }
-        }
-    }
-}
 
 void init_missiles()
 {
@@ -93,7 +51,7 @@ void update_missiles(Vector2 targeter, Ship player)
             if (CheckCollisionCircles(targets[i].pos, 10, targets[i].missile.pos, 10) || targets[i].missile.loc.is_hitting_type == LOC_TYPE_ASTEROID || targets[i].missile.loc.is_hitting_type == LOC_TYPE_BULLET)
             {
                 targets[i].is_active = false;
-                add_explosion(targets[i].missile.pos, 50.0f);
+                add_explosion(targets[i].missile.pos, 50.0f, 50);
                 remove_collider(&targets[i].missile.loc);
             }
             break;
@@ -116,8 +74,6 @@ void update_missiles(Vector2 targeter, Ship player)
         targets[i].missile.loc.dest.width = 10;
         targets[i].missile.loc.dest.height = 10;
     }
-
-    update_explosions();
 }
 
 void draw_missiles(Camera2D camera)
@@ -133,15 +89,5 @@ void draw_missiles(Camera2D camera)
         DrawTexturePro(missile_tex, (Rectangle){0, 0, missile_tex.width, missile_tex.height}, (Rectangle){targets[i].missile.pos.x, targets[i].missile.pos.y, missile_tex.width, missile_tex.height}, (Vector2){missile_tex.width / 2, missile_tex.height / 2}, targets[i].missile.rot, WHITE);
 
         DrawCircleLines(targets[i].pos.x, targets[i].pos.y, 5 / camera.zoom, RED);
-    }
-
-    // Draw the explosions.
-    for (int i = 0; i < EXPLOSION_MAX; i++)
-    {
-        if (explosions[i].alpha > 0.0f)
-        {
-            Color c = Fade(WHITE, explosions[i].alpha);
-            DrawCircle(explosions[i].pos.x, explosions[i].pos.y, explosions[i].radius, c);
-        }
     }
 }

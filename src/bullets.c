@@ -3,6 +3,7 @@
 #include <raylib.h>
 #include "bullets.h"
 #include "ship.h"
+#include "explosion.h"
 
 #define BULLET_MAX 32000
 Bullet bullets[BULLET_MAX];
@@ -31,7 +32,7 @@ void add_bullet(Vector2 vel, Vector2 pos, float power, float life)
     bullets[next_bullet].loc.dest.y = pos.y - 1;
     bullets[next_bullet].loc.dest.width = 2;
     bullets[next_bullet].loc.dest.height = 2;
-    
+
     add_collider(&bullets[next_bullet].loc, LOC_TYPE_BULLET);
 }
 
@@ -40,7 +41,6 @@ void update_bullets(Vector2 targeter, Ship player)
     gun_cooldown -= GetFrameTime();
 
     float gun_normal = atan2f(targeter.y - player.loc.y, targeter.x - player.loc.x);
-
 
     for (int i = 0; i < BULLET_MAX; i++)
     {
@@ -55,10 +55,11 @@ void update_bullets(Vector2 targeter, Ship player)
 
         switch (bullets[i].loc.is_hitting_type)
         {
-            case LOC_TYPE_ASTEROID:
-            case LOC_TYPE_MISSILE:
-                bullets[i].life = -1.0f;
-                break;
+        case LOC_TYPE_ASTEROID:
+        case LOC_TYPE_MISSILE:
+            add_explosion((Vector2){bullets[i].loc.dest.x + bullets[i].vel.x * GetFrameTime(), bullets[i].loc.dest.y + bullets[i].vel.y * GetFrameTime()}, 5.0f, 10);
+            bullets[i].life = -1.0f;
+            break;
         }
 
         if (bullets[i].life <= 0.0f)

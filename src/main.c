@@ -6,6 +6,7 @@
 #include "particles.h"
 #include "asteroid.h"
 #include "collider.h"
+#include "explosion.h"
 
 void update();
 
@@ -186,6 +187,7 @@ void update()
     update_bullets(targeter, player);
     update_ship(&player);
     update_asteroids();
+    update_explosions();
 
     BeginTextureMode(render_texture);
     {
@@ -212,6 +214,7 @@ void update()
             draw_missiles(camera);
             draw_bullets(camera);
             draw_asteroid();
+            draw_explosions();
 
             for (int i = 0; i < EMITTERS_MAX; i++)
             {
