@@ -1,5 +1,3 @@
 src/build
-src/external/libraylib.a
-src/external/raylib.h
 .vscode
 emsdk
