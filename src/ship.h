@@ -23,8 +23,10 @@ typedef struct
     float thruster_power;
     float engine_power;
     float bullet_speed;
-
+    
     EmitterPlacement emitters[EMITTERS_MAX];
+
+    float railgun_cooldown;
 } Ship;
 
 void update_ship(Ship *s);

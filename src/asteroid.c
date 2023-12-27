@@ -15,9 +15,12 @@ Asteroid asteroids[ASTEROID_MAX];
 void init_asteroid()
 {
     // Add to credits: https://opengameart.org/content/asteroid-sprite-sheets
-    tex[0] = LoadTexture("resources/asteroid1.png");
-    tex[1] = LoadTexture("resources/asteroid2.png");
-    tex[2] = LoadTexture("resources/asteroid3.png");
+    if (tex[0].id == 0)
+    {
+        tex[0] = LoadTexture("resources/asteroid1.png");
+        tex[1] = LoadTexture("resources/asteroid2.png");
+        tex[2] = LoadTexture("resources/asteroid3.png");
+    }
 
     int i = 0;
     for (int y = 0; y < 7; y++)
@@ -39,6 +42,8 @@ void init_asteroid()
 
     for (int a = 0; a < ASTEROID_MAX; a++)
     {
+        remove_collider(&asteroids[a].loc);
+        
         asteroids[a].type = GetRandomValue(0, 2);
         asteroids[a].frame = GetRandomValue(0, FRAME_COUNT - 1);
         asteroids[a].rate = GetRandomValue(1, 5) / 10.0f;
@@ -56,7 +61,8 @@ void update_asteroids()
 {
     for (int i = 0; i < ASTEROID_MAX; i++)
     {
-        if (asteroids[i].life <= 0) continue;
+        if (asteroids[i].life <= 0)
+            continue;
 
         asteroids[i].cool_down -= GetFrameTime();
 

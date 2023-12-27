@@ -1,7 +1,7 @@
 .ONESHELL:
 
 # Add any project C files here to have them built as part of the project.
-PROJECT_SOURCE_FILES ?= main.c missiles.c bullets.c particles.c ship.c asteroid.c collider.c explosion.c
+PROJECT_SOURCE_FILES ?= main.c missiles.c bullets.c particles.c ship.c asteroid.c collider.c explosion.c title.c starfield.c game.c
 
 # This is hardcoded to the path that `install-linux.sh` and `install-windows.bat` 
 # place emsdk files to avoid needing to set up the environment to build.
