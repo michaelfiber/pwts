@@ -1,5 +1,6 @@
 #include <raylib.h>
 #include "starfield.h"
+#include "game.h"
 
 #define STARS_MAX 8000
 
@@ -9,7 +10,7 @@ RenderTexture2D get_starfield()
 {
     if (starfield.id == 0)
     {
-        starfield = LoadRenderTexture(12000, 12000);
+        starfield = LoadRenderTexture(MAP_WIDTH * 2, MAP_HEIGHT * 2);
 
         BeginTextureMode(starfield);
         {
@@ -19,8 +20,8 @@ RenderTexture2D get_starfield()
 
             for (int i = 0; i < STARS_MAX; i++)
             {
-                float x = GetRandomValue(0, 12000);
-                float y = GetRandomValue(0, 12000);
+                float x = GetRandomValue(0, MAP_WIDTH * 2);
+                float y = GetRandomValue(0, MAP_HEIGHT * 2);
                 float z = GetRandomValue(1, 20) / 10.0f;
                 DrawCircle(x, y, z, star_color);
             }

@@ -31,7 +31,6 @@ void update_missiles(Vector2 targeter, Ship player)
                 targets[i].missile.state = MISSILE_FLOAT;
                 targets[i].missile.fuse = 0.5f;
                 targets[i].missile.rot = player.rot;
-                add_collider(&targets[i].missile.loc, LOC_TYPE_MISSILE);
                 break;
             }
         }
@@ -63,6 +62,7 @@ void update_missiles(Vector2 targeter, Ship player)
                 targets[i].missile.rot = atan2f(targets[i].missile.pos.y - targets[i].pos.y, targets[i].missile.pos.x - targets[i].pos.x) * RAD2DEG;
                 targets[i].missile.vel.x = cosf(targets[i].missile.rot * DEG2RAD) * 400;
                 targets[i].missile.vel.y = sinf(targets[i].missile.rot * DEG2RAD) * 400;
+                add_collider(&targets[i].missile.loc, LOC_TYPE_MISSILE);
             }
             break;
         }

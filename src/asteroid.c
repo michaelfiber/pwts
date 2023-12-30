@@ -1,6 +1,7 @@
 #include <raylib.h>
 #include "asteroid.h"
 #include "collider.h"
+#include "game.h"
 
 #define FRAME_COUNT 48
 
@@ -12,7 +13,7 @@ int frame_height = 128;
 
 Asteroid asteroids[ASTEROID_MAX];
 
-void init_asteroid()
+void init_asteroid(int asteroid_coint)
 {
     // Add to credits: https://opengameart.org/content/asteroid-sprite-sheets
     if (tex[0].id == 0)
@@ -43,17 +44,26 @@ void init_asteroid()
     for (int a = 0; a < ASTEROID_MAX; a++)
     {
         remove_collider(&asteroids[a].loc);
-        
-        asteroids[a].type = GetRandomValue(0, 2);
-        asteroids[a].frame = GetRandomValue(0, FRAME_COUNT - 1);
-        asteroids[a].rate = GetRandomValue(1, 5) / 10.0f;
-        asteroids[a].loc.dest.x = GetRandomValue(-5000, 5000);
-        asteroids[a].loc.dest.y = GetRandomValue(-5000, 5000);
-        asteroids[a].loc.dest.width = GetRandomValue(0, 96) + 32;
-        asteroids[a].loc.dest.height = asteroids[a].loc.dest.width;
-        asteroids[a].delta_rot = GetRandomValue(-500, 500);
-        asteroids[a].life = (asteroids[a].loc.dest.width - 32) * 10;
-        add_collider(&asteroids[a].loc, LOC_TYPE_ASTEROID);
+
+        if (a < asteroid_coint)
+        {
+            asteroids[a].type = GetRandomValue(0, 2);
+            asteroids[a].frame = GetRandomValue(0, FRAME_COUNT - 1);
+            asteroids[a].rate = GetRandomValue(1, 5) / 10.0f;
+            asteroids[a].loc.dest.x = GetRandomValue(-MAP_WIDTH / 2, MAP_WIDTH / 2);
+            asteroids[a].loc.dest.y = GetRandomValue(-MAP_HEIGHT / 2, MAP_HEIGHT / 2);
+            asteroids[a].loc.dest.width = GetRandomValue(0, 96) + 32;
+            asteroids[a].loc.dest.height = asteroids[a].loc.dest.width;
+            asteroids[a].delta_rot = GetRandomValue(-500, 500);
+            asteroids[a].life = (asteroids[a].loc.dest.width - 32) * 10;
+            asteroids[a].vel.x = GetRandomValue(-150, 150);
+            asteroids[a].vel.y = GetRandomValue(-100, 100);
+            add_collider(&asteroids[a].loc, LOC_TYPE_ASTEROID);
+        }
+        else
+        {
+            asteroids[a].life = 0.0f;
+        }
     }
 }
 
@@ -61,8 +71,29 @@ void update_asteroids()
 {
     for (int i = 0; i < ASTEROID_MAX; i++)
     {
-        if (asteroids[i].life <= 0)
+        if (asteroids[i].life <= 0.0f)
             continue;
+
+        asteroids[i].loc.dest.x += asteroids[i].vel.x * GetFrameTime();
+        asteroids[i].loc.dest.y += asteroids[i].vel.y * GetFrameTime();
+
+        if (asteroids[i].vel.x < 0 && asteroids[i].loc.dest.x + asteroids[i].loc.dest.width < MAP_WIDTH / -2)
+        {
+            asteroids[i].loc.dest.x = MAP_WIDTH / 2;
+        }
+        else if (asteroids[i].vel.x > 0 && asteroids[i].loc.dest.x > MAP_WIDTH / 2)
+        {
+            asteroids[i].loc.dest.x = MAP_WIDTH / -2 - asteroids[i].loc.dest.width;
+        }
+
+        if (asteroids[i].vel.y < 0 && asteroids[i].loc.dest.y + asteroids[i].loc.dest.height < MAP_HEIGHT / -2)
+        {
+            asteroids[i].loc.dest.y = MAP_HEIGHT / 2;
+        }
+        else if (asteroids[i].vel.y > 0 && asteroids[i].loc.dest.y > MAP_HEIGHT / 2)
+        {
+            asteroids[i].loc.dest.y = MAP_HEIGHT / -2 - asteroids[i].loc.dest.height;
+        }
 
         asteroids[i].cool_down -= GetFrameTime();
 

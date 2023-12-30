@@ -4,6 +4,7 @@
 #define LOC_TYPE_BULLET 0
 #define LOC_TYPE_MISSILE 1
 #define LOC_TYPE_ASTEROID 2
+#define LOC_TYPE_SHIP 3
 
 typedef struct
 {

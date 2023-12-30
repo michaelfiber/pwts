@@ -2,6 +2,7 @@
 
 #include <raylib.h>
 #include "particles.h"
+#include "collider.h"
 
 #define EMITTERS_MAX 3
 
@@ -27,6 +28,10 @@ typedef struct
     EmitterPlacement emitters[EMITTERS_MAX];
 
     float railgun_cooldown;
+
+    Location collider;
+
 } Ship;
 
+void init_ship(Ship *s);
 void update_ship(Ship *s);

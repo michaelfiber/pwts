@@ -27,7 +27,6 @@ int main(void)
 
     glow_shader = LoadShader(0, "resources/shader.fs");
     init_missiles();
-    init_asteroid();
     init_title();
     
     HideCursor();

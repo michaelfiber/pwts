@@ -8,6 +8,8 @@
 #include "explosion.h"
 #include "asteroid.h"
 
+bool show_colliders = false;
+
 Ship player = {0};
 typedef struct
 {
@@ -23,6 +25,8 @@ Camera2D camera;
 
 void init_game()
 {
+    init_asteroid(10);
+
     camera.offset.x = GetScreenWidth() / 2;
     camera.offset.y = GetScreenHeight() / 2;
     camera.zoom = 1.0f;
@@ -36,7 +40,7 @@ void init_game()
     {
         player.tex = LoadTexture("resources/ship.png");
     }
-    
+
     player.thruster_power = 150.0f;
     player.engine_power = 50.0f;
     player.bullet_speed = 800.0f;
@@ -67,10 +71,43 @@ void init_game()
     player.emitters[2].em.size = 2.0f;
     player.emitters[2].distance = 15;
     player.emitters[2].offset = 90;
+
+    init_ship(&player);
+}
+
+void draw_radar()
+{
+    static int width = MAP_WIDTH / 25;
+    static int height = MAP_HEIGHT / 25;
+
+    DrawRectangleLines(GetScreenWidth() - width - 10, GetScreenHeight() - height - 10, width, height, RED);
+
+    for (int i = 0; i < ASTEROID_MAX; i++)
+    {
+        if (asteroids[i].life > 0.0f)
+        {
+            DrawCircle(
+                GetScreenWidth() - width - 10 + width / 2 + (asteroids[i].loc.dest.x + asteroids[i].loc.dest.width / 2) / 25,
+                GetScreenHeight() - height - 10 + height / 2 + (asteroids[i].loc.dest.y + asteroids[i].loc.dest.height / 2) / 25,
+                4.0f,
+                RED);
+        }
+    }
+
+    DrawCircle(
+        GetScreenWidth() - width - 10 + width / 2 + player.loc.x / 25,
+        GetScreenHeight() - height - 10 + height / 2 + player.loc.y / 25,
+        4.0f,
+        GREEN);
 }
 
 bool draw_game(Shader glow_shader)
 {
+    if (IsKeyPressed(KEY_C))
+    {
+        show_colliders = !show_colliders;
+    }
+
     if (IsKeyDown(KEY_D))
     {
         player.delta_rot += player.thruster_power * GetFrameTime();
@@ -112,15 +149,6 @@ bool draw_game(Shader glow_shader)
         beam.alpha -= GetFrameTime();
     }
 
-    Vector2 mouse_pos = GetMousePosition();
-    Vector2 targeter = (Vector2){
-        ((mouse_pos.x - camera.offset.x) / camera.zoom) + player.loc.x,
-        ((mouse_pos.y - camera.offset.y) / camera.zoom) + player.loc.y};
-
-    player.loc.x += player.vel.x * GetFrameTime();
-    player.loc.y += player.vel.y * GetFrameTime();
-    player.rot += player.delta_rot * GetFrameTime();
-
     if (player.rot > 360)
     {
         player.rot -= 360;
@@ -143,6 +171,29 @@ bool draw_game(Shader glow_shader)
 
     camera.target.x = player.loc.x;
     camera.target.y = player.loc.y;
+
+    if (camera.target.x < MAP_WIDTH / -2 + GetScreenWidth() / 2)
+    {
+        camera.target.x = MAP_WIDTH / -2 + GetScreenWidth() / 2;
+    }
+    else if (camera.target.x > MAP_WIDTH / 2 - GetScreenWidth() / 2)
+    {
+        camera.target.x = MAP_WIDTH / 2 - GetScreenWidth() / 2;
+    }
+
+    if (camera.target.y < MAP_HEIGHT / -2 + GetScreenHeight() / 2)
+    {
+        camera.target.y = MAP_HEIGHT / -2 + GetScreenHeight() / 2;
+    }
+    else if (camera.target.y > MAP_HEIGHT / 2 - GetScreenHeight() / 2)
+    {
+        camera.target.y = MAP_HEIGHT / 2 - GetScreenHeight() / 2;
+    }
+
+    Vector2 mouse_pos = GetMousePosition();
+    Vector2 targeter = (Vector2){
+        mouse_pos.x + camera.target.x - GetScreenWidth() / 2,
+        mouse_pos.y + camera.target.y - GetScreenHeight() / 2};
 
     check_colliders();
 
@@ -169,7 +220,7 @@ bool draw_game(Shader glow_shader)
         camera.zoom = zoom;
         BeginMode2D(camera);
         {
-            DrawRectangleLines(-5000, -5000, 10000, 10000, GREEN);
+            DrawRectangleLines(-5000, -3000, 10000, 6000, GREEN);
 
             if (beam.alpha > 0.0f)
             {
@@ -189,7 +240,10 @@ bool draw_game(Shader glow_shader)
             DrawTexturePro(player.tex, (Rectangle){0, 0, player.tex.width, player.tex.height}, (Rectangle){player.loc.x, player.loc.y, player.tex.width, player.tex.height}, (Vector2){player.tex.width / 2, player.tex.height / 2}, player.rot, WHITE);
             // DrawCircleLines((int)player.loc.x, (int)player.loc.y, 20, WHITE);
             DrawCircleLines(targeter.x, targeter.y, 5 / camera.zoom, GREEN);
-            // draw_colliders();
+            if (show_colliders)
+            {
+                draw_colliders();
+            }
         }
         EndMode2D();
     }
@@ -202,6 +256,8 @@ bool draw_game(Shader glow_shader)
             DrawTextureRec(render_texture.texture, (Rectangle){0, 0, GetScreenWidth(), -GetScreenHeight()}, (Vector2){0, 0}, WHITE);
         }
         EndShaderMode();
+
+        draw_radar();
 
         DrawText(TextFormat("%f\n%f\n%d %d\n", player.rot, camera.zoom, (int)player.loc.x, (int)player.loc.y), 20, 40, GetFontDefault().baseSize * 2, RED);
         DrawFPS(20, 20);
