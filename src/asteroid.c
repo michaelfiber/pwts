@@ -13,6 +13,12 @@ int frame_height = 128;
 
 Asteroid asteroids[ASTEROID_MAX];
 
+void destroy_asteroid(Asteroid *a)
+{
+    remove_collider(&a->loc);
+    a->life = 0.0f;
+}
+
 void init_asteroid(int asteroid_coint)
 {
     // Add to credits: https://opengameart.org/content/asteroid-sprite-sheets
@@ -119,7 +125,7 @@ void update_asteroids()
 
         if (asteroids[i].life <= 0)
         {
-            remove_collider(&asteroids[i].loc);
+            destroy_asteroid(&asteroids[i]);
         }
     }
 }

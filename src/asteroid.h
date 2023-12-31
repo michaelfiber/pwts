@@ -18,6 +18,7 @@ typedef struct
 #define ASTEROID_MAX 500
 extern Asteroid asteroids[ASTEROID_MAX];
 
+void destroy_asteroid(Asteroid *a);
 void init_asteroid(int asteroid_count);
 void update_asteroids();
 void draw_asteroid();

@@ -23,6 +23,64 @@ Beam beam;
 RenderTexture2D render_texture;
 Camera2D camera;
 
+int on_segment(Vector2 p, Vector2 q, Vector2 r)
+{
+    if (q.x <= fmax(p.x, r.x) && q.x >= fmin(p.x, r.x) &&
+        q.y <= fmax(p.y, r.y) && q.y >= fmin(p.y, r.y))
+        return 1;
+    return 0;
+}
+
+int orientation(Vector2 p, Vector2 q, Vector2 r)
+{
+    float val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
+    if (val == 0)
+        return 0;             // collinear
+    return (val > 0) ? 1 : 2; // clock or counterclock wise
+}
+
+int do_intersect(Vector2 p1, Vector2 q1, Vector2 p2, Vector2 q2)
+{
+    int o1 = orientation(p1, q1, p2);
+    int o2 = orientation(p1, q1, q2);
+    int o3 = orientation(p2, q2, p1);
+    int o4 = orientation(p2, q2, q1);
+
+    if (o1 != o2 && o3 != o4)
+        return 1; // They intersect
+
+    if (o1 == 0 && on_segment(p1, p2, q1))
+        return 1; // p1 , q1 and p2 are collinear and p2 lies on segment p1q1
+    if (o2 == 0 && on_segment(p1, q2, q1))
+        return 1; // p1 , q1 and q2 are collinear and q2 lies on segment p1q1
+    if (o3 == 0 && on_segment(p2, p1, q2))
+        return 1; // p2 , q2 and p1 are collinear and p1 lies on segment p2q2
+    if (o4 == 0 && on_segment(p2, q1, q2))
+        return 1; // p2 , q2 and q1 are collinear and q1 lies on segment p2q2
+
+    return 0; // Doesn't intersect
+}
+
+int line_intersects_rectangle(Vector2 lineStart, Vector2 lineEnd, Rectangle rect)
+{
+    Vector2 topLeft = (Vector2){rect.x, rect.y};
+    Vector2 bottomRight = (Vector2){rect.x + rect.width, rect.y + rect.height};
+
+    Vector2 topRight = {bottomRight.x, topLeft.y};
+    Vector2 bottomLeft = {topLeft.x, bottomRight.y};
+
+    // Check if the line intersects any of the rectangle edges
+    if (do_intersect(lineStart, lineEnd, topLeft, topRight) ||
+        do_intersect(lineStart, lineEnd, topRight, bottomRight) ||
+        do_intersect(lineStart, lineEnd, bottomRight, bottomLeft) ||
+        do_intersect(lineStart, lineEnd, bottomLeft, topLeft))
+    {
+        return 1; // Intersects
+    }
+
+    return 0; // Doesn't intersect
+}
+
 void init_game()
 {
     init_asteroid(10);
@@ -141,6 +199,13 @@ bool draw_game(Shader glow_shader)
         beam.start.y = player.loc.y;
         beam.end.x = beam.start.x + cosf(player.rot * DEG2RAD) * 5000;
         beam.end.y = beam.start.y + sinf(player.rot * DEG2RAD) * 5000;
+        for (int i = 0; i < ASTEROID_MAX; i++)
+        {
+            if (asteroids[i].life > 0 && line_intersects_rectangle(beam.start, beam.end, asteroids[i].loc.dest))
+            {
+                destroy_asteroid(&asteroids[i]);
+            }
+        }
         beam.alpha = 1.0f;
     }
 
