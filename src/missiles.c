@@ -11,6 +11,36 @@ Texture2D missile_tex;
 void init_missiles()
 {
     missile_tex = LoadTexture("resources/missile.png");
+
+    // reserve the first 4 slots for the player. The remaining 12 are for enemies to use.
+    for (int i = 0; i < 4; i++)
+    {
+        targets[i].is_player = true;
+    }
+}
+
+void fire_missile(Vector2 pos, Vector2 dest)
+{
+    for (int i = 0; i < TARGET_MAX; i++)
+    {
+        if (targets[i].is_player || targets[i].is_active)
+        {
+            continue;
+        }
+
+        targets[i].is_active = true;
+        targets[i].pos.x = dest.x;
+        targets[i].pos.y = dest.y;
+
+        targets[i].missile.pos.x = pos.x;
+        targets[i].missile.pos.y = pos.y;
+        targets[i].missile.vel.x = 50;
+        targets[i].missile.vel.y = 0;
+        targets[i].missile.fuse = 0.5f;
+        targets[i].missile.state = MISSILE_FLOAT;
+
+        break;
+    }
 }
 
 void update_missiles(Vector2 targeter, Ship player)
@@ -19,11 +49,12 @@ void update_missiles(Vector2 targeter, Ship player)
     {
         for (int i = 0; i < TARGET_MAX; i++)
         {
-            if (!targets[i].is_active)
+            if (targets[i].is_player && !targets[i].is_active)
             {
                 targets[i].is_active = true;
                 targets[i].pos.x = targeter.x;
                 targets[i].pos.y = targeter.y;
+
                 targets[i].missile.pos.x = player.loc.x;
                 targets[i].missile.pos.y = player.loc.y;
                 targets[i].missile.vel.x = player.vel.x + 50 * cosf((player.rot + 90) * DEG2RAD);

@@ -7,6 +7,8 @@
 #include "bullets.h"
 #include "explosion.h"
 #include "asteroid.h"
+#include "enemy.h"
+#include "my-library.h"
 
 bool show_colliders = false;
 
@@ -85,6 +87,8 @@ void init_game()
 {
     init_asteroid(10);
 
+    add_enemy((Vector2){0, 0}, 100.0f, LoadTexture("resources/ship.png"));
+
     camera.offset.x = GetScreenWidth() / 2;
     camera.offset.y = GetScreenHeight() / 2;
     camera.zoom = 1.0f;
@@ -131,6 +135,8 @@ void init_game()
     player.emitters[2].offset = 90;
 
     init_ship(&player);
+
+    Say("destroy asteroids and avoid missiles to survive");
 }
 
 void draw_radar()
@@ -147,6 +153,18 @@ void draw_radar()
             DrawCircle(
                 GetScreenWidth() - width - 10 + width / 2 + (asteroids[i].loc.dest.x + asteroids[i].loc.dest.width / 2) / 25,
                 GetScreenHeight() - height - 10 + height / 2 + (asteroids[i].loc.dest.y + asteroids[i].loc.dest.height / 2) / 25,
+                4.0f,
+                GRAY);
+        }
+    }
+
+    for (int i = 0; i < MAX_ENEMY; i++)
+    {
+        if (enemies[i].life > 0.0f)
+        {
+            DrawCircle(
+                GetScreenWidth() - width - 10 + width / 2 + (enemies[i].loc.dest.x) / 25,
+                GetScreenHeight() - height - 10 + height / 2 + (enemies[i].loc.dest.y) / 25,
                 4.0f,
                 RED);
         }
@@ -267,6 +285,7 @@ bool draw_game(Shader glow_shader)
     update_ship(&player);
     update_asteroids();
     update_explosions();
+    update_enemies();
 
     RenderTexture2D starfield_texture = get_starfield();
 
@@ -302,9 +321,13 @@ bool draw_game(Shader glow_shader)
                 draw_emitter(&player.emitters[i].em);
             }
 
+            draw_enemies();
+
             DrawTexturePro(player.tex, (Rectangle){0, 0, player.tex.width, player.tex.height}, (Rectangle){player.loc.x, player.loc.y, player.tex.width, player.tex.height}, (Vector2){player.tex.width / 2, player.tex.height / 2}, player.rot, WHITE);
             // DrawCircleLines((int)player.loc.x, (int)player.loc.y, 20, WHITE);
+
             DrawCircleLines(targeter.x, targeter.y, 5 / camera.zoom, GREEN);
+
             if (show_colliders)
             {
                 draw_colliders();
