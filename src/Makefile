@@ -10,7 +10,7 @@ CC=../emsdk/emsdk-main/upstream/emscripten/emcc
 # This is the directory within `src` where the finished files will be placed.
 DEST=./build
 
-CFLAGS=-I. -I./external -s USE_GLFW=3 --preload-file resources --shell-file ./minshell.html -s INITIAL_MEMORY=67108864 --js-library my-library.js
+CFLAGS=-I. -I./external 
 MAKE=make
 
 OBJ=$(patsubst %.c, %.o, $(PROJECT_SOURCE_FILES)) ./external/libraylib.a
@@ -20,7 +20,7 @@ OBJ=$(patsubst %.c, %.o, $(PROJECT_SOURCE_FILES)) ./external/libraylib.a
 
 index.html: $(OBJ)
 	mkdir -p $(DEST)
-	$(CC) -o $(DEST)/$@ $^ $(CFLAGS)
+	$(CC) -o $(DEST)/$@ $^ $(CFLAGS) -s USE_GLFW=3 -s INITIAL_MEMORY=67108864 --preload-file resources --shell-file ./minshell.html --js-library my-library.js
 
 clean:
 	rm *.o
