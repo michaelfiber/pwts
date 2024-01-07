@@ -15,6 +15,7 @@ typedef struct
 } Enemy;
 
 extern Enemy enemies[MAX_ENEMY];
+extern int enemy_count;
 
 void add_enemy(Vector2 loc, float life, Texture2D tex);
 void draw_enemies();

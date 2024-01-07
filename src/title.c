@@ -27,8 +27,10 @@ void init_title()
         asteroid_tex = LoadTexture("resources/asteroid1.png");
     }
 
+    fade_out = false;
     fade = 0.0f;
     sleep = 1.0f;
+    offset = 0.0f;
     frame = 0;
     frame_timer = 1.0f;
 

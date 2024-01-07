@@ -19,7 +19,7 @@ void init_missiles()
     }
 }
 
-void fire_missile(Vector2 pos, Vector2 dest)
+void fire_missile(Vector2 pos, Vector2 dest, float initial_angle)
 {
     for (int i = 0; i < TARGET_MAX; i++)
     {
@@ -34,8 +34,8 @@ void fire_missile(Vector2 pos, Vector2 dest)
 
         targets[i].missile.pos.x = pos.x;
         targets[i].missile.pos.y = pos.y;
-        targets[i].missile.vel.x = 50;
-        targets[i].missile.vel.y = 0;
+        targets[i].missile.vel.x = cosf(initial_angle) * 50.0f;
+        targets[i].missile.vel.y = sinf(initial_angle) * 50.0f;
         targets[i].missile.fuse = 0.5f;
         targets[i].missile.state = MISSILE_FLOAT;
 
@@ -45,7 +45,7 @@ void fire_missile(Vector2 pos, Vector2 dest)
 
 void update_missiles(Vector2 targeter, Ship player)
 {
-    if (IsMouseButtonPressed(1))
+    if (IsMouseButtonPressed(1) && player.broken_missile_timer <= 0.0f)
     {
         for (int i = 0; i < TARGET_MAX; i++)
         {
@@ -78,7 +78,7 @@ void update_missiles(Vector2 targeter, Ship player)
         {
         case MISSILE_GO:
             // check for collision
-            if (CheckCollisionCircles(targets[i].pos, 10, targets[i].missile.pos, 10) || targets[i].missile.loc.is_hitting_type == LOC_TYPE_ASTEROID || targets[i].missile.loc.is_hitting_type == LOC_TYPE_BULLET)
+            if (CheckCollisionCircles(targets[i].pos, 10, targets[i].missile.pos, 10) || targets[i].missile.loc.is_hitting_type == LOC_TYPE_ASTEROID || targets[i].missile.loc.is_hitting_type == LOC_TYPE_BULLET || (targets[i].missile.loc.is_hitting_type == LOC_TYPE_ENEMY && targets[i].is_player) || (targets[i].missile.loc.is_hitting_type == LOC_TYPE_SHIP && !targets[i].is_player))
             {
                 targets[i].is_active = false;
                 add_explosion(targets[i].missile.pos, 50.0f, 50);

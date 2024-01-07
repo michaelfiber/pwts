@@ -15,6 +15,12 @@ typedef struct
 
 typedef struct
 {
+    float broken_gun_timer;
+    float broken_railgun_timer;
+    float broken_missile_timer;
+
+    float shake_timer;
+    float life;
     Texture2D tex;
     float rot;
     float delta_rot;

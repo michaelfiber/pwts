@@ -9,8 +9,13 @@
 #include "asteroid.h"
 #include "enemy.h"
 #include "my-library.h"
+#include "puff.h"
 
+bool is_victory;
+
+float round_end_timer;
 bool show_colliders = false;
+int level = 1;
 
 Ship player = {0};
 typedef struct
@@ -83,11 +88,31 @@ int line_intersects_rectangle(Vector2 lineStart, Vector2 lineEnd, Rectangle rect
     return 0; // Doesn't intersect
 }
 
+void add_enemies(int count)
+{
+    for (int i = 0; i < count; i++)
+    {
+        float angle = GetRandomValue(0, 359) * DEG2RAD;
+        float distance = GetRandomValue(900, MAP_HEIGHT / 2) * 0.9f;
+
+        add_enemy((Vector2){cosf(angle) * distance, sinf(angle) * distance}, 100.0f, LoadTexture("resources/ship.png"));
+    }
+}
+
 void init_game()
 {
-    init_asteroid(10);
+    int a = 0;
+    int e = 0;
 
-    add_enemy((Vector2){0, 0}, 100.0f, LoadTexture("resources/ship.png"));
+    for (int i = 0; i < level; i++) {
+        a += 50;
+        e += 4;
+    }
+
+    round_end_timer = 5.0f;
+
+    init_asteroid(a);
+    add_enemies(e);
 
     camera.offset.x = GetScreenWidth() / 2;
     camera.offset.y = GetScreenHeight() / 2;
@@ -103,9 +128,16 @@ void init_game()
         player.tex = LoadTexture("resources/ship.png");
     }
 
-    player.thruster_power = 150.0f;
-    player.engine_power = 50.0f;
+    player.thruster_power = 150.0f + level * 15;
+    player.engine_power = 50.0f + level * 5;
     player.bullet_speed = 800.0f;
+    
+    player.vel.x = 0;
+    player.vel.y = 0;
+    player.loc.x = 0;
+    player.loc.y = 0;
+    player.rot = 0;
+    player.delta_rot = 0;
 
     player.emitters[0].em.width = 5.0f;
     player.emitters[0].em.color = (Color){150, 200, 255, 255};
@@ -175,10 +207,74 @@ void draw_radar()
         GetScreenHeight() - height - 10 + height / 2 + player.loc.y / 25,
         4.0f,
         GREEN);
+
+    int ui_size = GetFontDefault().baseSize * 2;
+
+    DrawText("HEALTH", GetScreenWidth() - 10 - MeasureText("HEALTH", ui_size), 420, ui_size, WHITE);
+    float health = player.life / 1000.0f * width;
+    DrawRectangle(GetScreenWidth() - 10 - width, 440, health, 20, GREEN);
+    DrawRectangleLines(GetScreenWidth() - 10 - width, 440, width, 20, WHITE);
+
+    if (player.broken_gun_timer > 0.0f)
+    {
+        DrawText("PDC DAMAGED", GetScreenWidth() / 2 - MeasureText("PDC DAMAGED", ui_size) / 2, GetScreenHeight() / 2 + 100, ui_size, RED);
+        float level = player.broken_gun_timer;
+        DrawRectangle(
+            GetScreenWidth() / 2 - 50,
+            GetScreenHeight() / 2 + 120,
+            10 * level,
+            10, RED);
+    }
+
+    if (player.broken_railgun_timer > 0.0f)
+    {
+        DrawText("RAIL GUN DAMAGED", GetScreenWidth() / 2 - MeasureText("RAIL GUN DAMAGED", ui_size) / 2, GetScreenHeight() / 2 + 120, ui_size, RED);
+        float level = player.broken_railgun_timer;
+        DrawRectangle(
+            GetScreenWidth() / 2 - 50,
+            GetScreenHeight() / 2 + 140,
+            10 * level,
+            10, RED);
+    }
+
+    if (player.broken_missile_timer > 0.0f)
+    {
+        DrawText("MISSILE LAUNCHER DAMAGED", GetScreenWidth() / 2 - MeasureText("MISSILE LAUNCHER DAMAGED", ui_size) / 2, GetScreenHeight() / 2 + 140, ui_size, RED);
+        float level = player.broken_missile_timer;
+        DrawRectangle(
+            GetScreenWidth() / 2 - 50,
+            GetScreenHeight() / 2 + 160,
+            10 * level,
+            10, RED);
+    }
 }
 
 bool draw_game(Shader glow_shader)
 {
+    if (player.life <= 0.0f)
+    {
+        is_victory = false;
+        level = 1;
+        return false;
+    }
+
+    if (enemy_count == 0)
+    {
+        round_end_timer -= GetFrameTime();
+    }
+
+    if (round_end_timer <= 0.0f)
+    {
+        level++;
+        if (level == 6)
+        {
+            is_victory = true;
+            level = 1;
+            return false;
+        }
+        init_game();
+    }
+
     if (IsKeyPressed(KEY_C))
     {
         show_colliders = !show_colliders;
@@ -209,7 +305,7 @@ bool draw_game(Shader glow_shader)
         player.railgun_cooldown -= GetFrameTime();
     }
 
-    if (IsKeyPressed(KEY_SPACE) && player.railgun_cooldown <= 0.0f)
+    if (IsKeyPressed(KEY_SPACE) && player.railgun_cooldown <= 0.0f && player.broken_railgun_timer <= 0.0f)
     {
         player.vel.x += cosf((player.rot + 180) * DEG2RAD) * 5000 * GetFrameTime();
         player.vel.y += sinf((player.rot + 180) * DEG2RAD) * 5000 * GetFrameTime();
@@ -219,7 +315,7 @@ bool draw_game(Shader glow_shader)
         beam.end.y = beam.start.y + sinf(player.rot * DEG2RAD) * 5000;
         for (int i = 0; i < ASTEROID_MAX; i++)
         {
-            if (asteroids[i].life > 0 && line_intersects_rectangle(beam.start, beam.end, asteroids[i].loc.dest))
+            if (!asteroids[i].invuln && asteroids[i].life > 0 && line_intersects_rectangle(beam.start, beam.end, asteroids[i].loc.dest))
             {
                 destroy_asteroid(&asteroids[i]);
             }
@@ -273,6 +369,12 @@ bool draw_game(Shader glow_shader)
         camera.target.y = MAP_HEIGHT / 2 - GetScreenHeight() / 2;
     }
 
+    if (player.shake_timer > 0.0f)
+    {
+        camera.target.x += cosf(player.shake_timer * 50) * 3;
+        camera.target.y += sinf(player.shake_timer * 50) * 3;
+    }
+
     Vector2 mouse_pos = GetMousePosition();
     Vector2 targeter = (Vector2){
         mouse_pos.x + camera.target.x - GetScreenWidth() / 2,
@@ -286,6 +388,7 @@ bool draw_game(Shader glow_shader)
     update_asteroids();
     update_explosions();
     update_enemies();
+    update_puffs();
 
     RenderTexture2D starfield_texture = get_starfield();
 
@@ -314,6 +417,7 @@ bool draw_game(Shader glow_shader)
             draw_missiles(camera);
             draw_bullets(camera);
             draw_asteroid();
+            draw_puffs();
             draw_explosions();
 
             for (int i = 0; i < EMITTERS_MAX; i++)
@@ -347,8 +451,18 @@ bool draw_game(Shader glow_shader)
 
         draw_radar();
 
-        DrawText(TextFormat("%f\n%f\n%d %d\n", player.rot, camera.zoom, (int)player.loc.x, (int)player.loc.y), 20, 40, GetFontDefault().baseSize * 2, RED);
-        DrawFPS(20, 20);
+        // DrawText(TextFormat("%f\n%f\n%d %d\n", player.rot, camera.zoom, (int)player.loc.x, (int)player.loc.y), 20, 40, GetFontDefault().baseSize * 2, RED);
+        // DrawFPS(20, 20);
+
+        DrawText(TextFormat("Remaining Enemies: %d", enemy_count), 10, 10, GetFontDefault().baseSize * 2, GREEN);
+
+
+        if (enemy_count == 0)
+        {
+            char text[] = "LEVEL COMPLETE!";
+            int text_width = MeasureText(text, GetFontDefault().baseSize * 4);
+            DrawText(text, GetScreenWidth() / 2 - text_width / 2, GetScreenHeight() / 2 - 20, GetFontDefault().baseSize * 4, GREEN);
+        }
     }
     EndDrawing();
 

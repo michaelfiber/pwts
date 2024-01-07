@@ -4,6 +4,7 @@
 
 typedef struct
 {
+    bool invuln;
     Location loc;
     int type;
     int frame;

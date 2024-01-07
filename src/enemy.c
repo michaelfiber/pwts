@@ -1,11 +1,14 @@
 #include "enemy.h"
 #include "missiles.h"
 #include "game.h"
+#include "puff.h"
 
 Enemy enemies[MAX_ENEMY];
+int enemy_count = 0;
 
 void update_enemies()
 {
+    enemy_count = 0;
     for (int i = 0; i < MAX_ENEMY; i++)
     {
         if (enemies[i].life <= 0.0f)
@@ -13,11 +16,36 @@ void update_enemies()
             continue;
         }
 
+        enemy_count++;
+
         enemies[i].missile_timer -= GetFrameTime();
+
         if (enemies[i].missile_timer <= 0.0f && CheckCollisionPointCircle(player.loc, (Vector2){enemies[i].loc.dest.x, enemies[i].loc.dest.y}, 700.0f))
         {
             enemies[i].missile_timer = enemies[i].missile_wait;
-            fire_missile((Vector2){enemies[i].loc.dest.x, enemies[i].loc.dest.y}, (Vector2){player.loc.x + player.vel.x, player.loc.y + player.vel.y});
+            float angle = 90 * DEG2RAD;
+            if (player.loc.y > enemies[i].loc.dest.y)
+            {
+                angle = 270 * DEG2RAD;
+            }
+            fire_missile((Vector2){enemies[i].loc.dest.x, enemies[i].loc.dest.y}, (Vector2){player.loc.x + player.vel.x, player.loc.y + player.vel.y}, angle);
+        }
+
+        switch (enemies[i].loc.is_hitting_type)
+        {
+        case LOC_TYPE_BULLET:
+            enemies[i].life -= 10.0f;
+            break;
+        case LOC_TYPE_MISSILE:
+            enemies[i].life -= 100.0f;
+            break;
+        }
+
+        if (enemies[i].life <= 0.0f)
+        {
+            TraceLog(LOG_INFO, "Destroy enemy");
+            add_puff((Vector2){enemies[i].loc.dest.x + enemies[i].loc.dest.width / 2, enemies[i].loc.dest.y + enemies[i].loc.dest.height / 2}, 1000.0f);
+            remove_collider(&enemies[i].loc);
         }
     }
 }

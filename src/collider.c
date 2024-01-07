@@ -11,26 +11,29 @@ typedef struct Node
 } Node;
 
 Node *root = NULL;
-Node *tail = NULL;
 
 void add_collider(Location *loc, int type)
 {
-   
-    if (root == NULL && tail == NULL)
+    Node *new_node = MemAlloc(sizeof(Node));
+    new_node->loc = loc;
+    new_node->type = type;
+    new_node->next = NULL;
+
+    if (root == NULL)
     {
-        root = MemAlloc(sizeof(Node));
-        root->loc = loc;
-        root->type = type;
-        root->next = NULL;
-        tail = root;
+        root = new_node;
+        return;
     }
-    else
+
+    Node *target = root;
+    while (target != NULL)
     {
-        tail->next = MemAlloc(sizeof(Node));
-        tail = tail->next;
-        tail->loc = loc;
-        tail->type = type;
-        tail->next = NULL;
+        if (target->next == NULL)
+        {
+            target->next = new_node;
+            return;
+        }
+        target = target->next;
     }
 }
 
@@ -43,21 +46,11 @@ void remove_collider(Location *loc)
     {
         if (current->loc == loc)
         {
-            if (current == root)
+            if (prev == NULL)
             {
                 root = current->next;
             }
-            if (current == tail)
-            {
-                if (prev != NULL)
-                {
-                    tail = prev;
-                } else {
-                    tail = root;
-                }
-            }
-            
-            if (prev != NULL)
+            else 
             {
                 prev->next = current->next;
             }

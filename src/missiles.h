@@ -32,4 +32,4 @@ typedef struct
 void init_missiles();
 void update_missiles(Vector2 targeter, Ship player);
 void draw_missiles(Camera2D camera);
-void fire_missile(Vector2 pos, Vector2 dest);
+void fire_missile(Vector2 pos, Vector2 dest, float initial_angle);

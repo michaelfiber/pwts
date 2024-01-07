@@ -6,6 +6,8 @@
 #define MAP_WIDTH 10000
 #define MAP_HEIGHT 6000
 
+extern bool is_victory;
+extern int level;
 extern Ship player;
 
 void init_game();

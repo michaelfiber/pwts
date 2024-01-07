@@ -55,6 +55,7 @@ void update_bullets(Vector2 targeter, Ship player)
 
         switch (bullets[i].loc.is_hitting_type)
         {
+        case LOC_TYPE_ENEMY:
         case LOC_TYPE_ASTEROID:
         case LOC_TYPE_MISSILE:
             add_explosion((Vector2){bullets[i].loc.dest.x + bullets[i].vel.x * GetFrameTime(), bullets[i].loc.dest.y + bullets[i].vel.y * GetFrameTime()}, 5.0f, 10);
@@ -69,7 +70,7 @@ void update_bullets(Vector2 targeter, Ship player)
         bullet_count++;
     }
 
-    if (IsMouseButtonDown(0) && gun_cooldown <= 0.0f)
+    if (IsMouseButtonDown(0) && gun_cooldown <= 0.0f && player.broken_gun_timer <= 0.0f)
     {
         gun_cooldown = 0.05f;
 
