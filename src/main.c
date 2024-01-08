@@ -11,6 +11,7 @@
 #include "title.h"
 #include "game.h"
 #include "briefing.h"
+#include "sounds.h"
 
 void update();
 
@@ -58,7 +59,11 @@ bool draw_defeat()
 
 int main(void)
 {
-    InitWindow(ScreenWidth, ScreenHeight, "Hello World!");
+    InitWindow(ScreenWidth, ScreenHeight, "People who throw stones");
+
+    InitAudioDevice();
+
+    init_sounds();
 
     glow_shader = LoadShader(0, "resources/shader.fs");
     init_missiles();

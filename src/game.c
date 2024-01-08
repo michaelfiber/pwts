@@ -10,6 +10,7 @@
 #include "enemy.h"
 #include "my-library.h"
 #include "puff.h"
+#include "sounds.h"
 
 bool is_victory;
 
@@ -294,6 +295,7 @@ bool draw_game(Shader glow_shader)
     {
         player.vel.x += cosf(player.rot * DEG2RAD) * player.engine_power * GetFrameTime();
         player.vel.y += sinf(player.rot * DEG2RAD) * player.engine_power * GetFrameTime();
+        play_sound(SOUND_ENGINE);
     }
 
     player.emitters[0].em.on = IsKeyDown(KEY_W);
@@ -307,6 +309,7 @@ bool draw_game(Shader glow_shader)
 
     if (IsKeyPressed(KEY_SPACE) && player.railgun_cooldown <= 0.0f && player.broken_railgun_timer <= 0.0f)
     {
+        play_sound(SOUND_RAIL);
         player.vel.x += cosf((player.rot + 180) * DEG2RAD) * 5000 * GetFrameTime();
         player.vel.y += sinf((player.rot + 180) * DEG2RAD) * 5000 * GetFrameTime();
         beam.start.x = player.loc.x;

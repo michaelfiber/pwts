@@ -4,6 +4,7 @@
 #include "bullets.h"
 #include "ship.h"
 #include "explosion.h"
+#include "sounds.h"
 
 #define BULLET_MAX 32000
 Bullet bullets[BULLET_MAX];
@@ -72,6 +73,8 @@ void update_bullets(Vector2 targeter, Ship player)
 
     if (IsMouseButtonDown(0) && gun_cooldown <= 0.0f && player.broken_gun_timer <= 0.0f)
     {
+        play_sound(SOUND_PDC);
+
         gun_cooldown = 0.05f;
 
         float offset = gun_normal - player.rot * DEG2RAD;

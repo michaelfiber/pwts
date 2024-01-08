@@ -1,5 +1,6 @@
 #include "math.h"
 #include "explosion.h"
+#include "sounds.h"
 
 #define EXPLOSIONS_MAX 100
 
@@ -7,6 +8,8 @@ Explosion e[EXPLOSIONS_MAX];
 
 void add_explosion(Vector2 pos, float radius, int particle_count)
 {
+    play_sound(SOUND_EXPLODE);
+    
     if (particle_count > 50)
     {
         particle_count = 50;

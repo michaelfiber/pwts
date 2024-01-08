@@ -3,6 +3,7 @@
 #include "missiles.h"
 #include "ship.h"
 #include "explosion.h"
+#include "sounds.h"
 
 Target targets[TARGET_MAX];
 Vector2 targeter;
@@ -21,6 +22,7 @@ void init_missiles()
 
 void fire_missile(Vector2 pos, Vector2 dest, float initial_angle)
 {
+    play_sound(SOUND_MISSILE);
     for (int i = 0; i < TARGET_MAX; i++)
     {
         if (targets[i].is_player || targets[i].is_active)
